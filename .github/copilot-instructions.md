@@ -21,8 +21,10 @@ Scripts/build.sh clean
 It builds into `~/Library/Caches/BetterVolume-build` with `--disable-index-store` and assembles
 the `.app` there too. This was originally required because the repo lived on an SMB share, which
 corrupted the Clang module cache, broke the index store's atomic renames, and attached Finder
-metadata that `codesign` rejects. Keep using the script even on local disk — it is also where
-signing and bundling live.
+metadata that `codesign` rejects. The repo now lives on local disk (`~/Developer/BetterVolume`)
+and plain `swift build` works again, but keep using the script — it is also where signing and
+bundling live. If you ever work from a copy on the `Mass Sync` SMB share, the script is the only
+thing that will build.
 
 ## Architecture
 
