@@ -262,20 +262,26 @@ guesswork from a later one.
   volume control.
 - Start-at-login via `SMAppService`, disabled unless running from an app bundle.
 
-### Phase 4 — Ship it — **ad-hoc done, Developer ID pending**
-- `Scripts/build.sh app` produces a signed `BetterVolume.app` (`LSUIElement`, hardened runtime
-  when a real identity is used). `install` copies it to `/Applications`.
-- **Blocker for sharing:** `security find-identity -v -p codesigning` reports 0 valid
-  identities on this Mac. Create a *Developer ID Application* certificate (Xcode → Settings →
-  Accounts → Manage Certificates → +), then:
+### Phase 4 — Ship it — **Developer ID signed; notarisation pending**
+- `Scripts/build.sh app` produces `BetterVolume.app` (`LSUIElement`) signed with the Developer ID
+  certificate it finds in the keychain, using hardened runtime and a secure timestamp.
+  `install` copies it to `/Applications`.
+- Signed as `Developer ID Application: Luciano DiNino (TW9Z5U2FJ9)`. Verified: `flags=0x10000
+  (runtime)`, chain up to Apple Root CA, timestamp present, `--verify --deep --strict` passes.
+- **Only needed to share the app with others** — notarisation. A locally built app carries no
+  quarantine attribute, so it launches fine here despite `spctl` reporting
+  `rejected — Unnotarized Developer ID`. To notarise:
   ```
-  BETTERVOLUME_SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" Scripts/build.sh app
+  xcrun notarytool store-credentials bettervolume \
+      --apple-id <apple-id> --team-id TW9Z5U2FJ9 --password <app-specific-password>
   ditto -c -k --keepParent <app> BetterVolume.zip
-  xcrun notarytool submit BetterVolume.zip --keychain-profile <profile> --wait
+  xcrun notarytool submit BetterVolume.zip --keychain-profile bettervolume --wait
   xcrun stapler staple <app>
   ```
-  Also change `BUNDLE_ID` in the script and `AppInfo.bundleIdentifier` to your team's prefix
-  before signing.
+  The app-specific password comes from https://account.apple.com → Sign-In and Security →
+  App-Specific Passwords (not the Apple ID password).
+- `BUNDLE_ID` stays `com.bettervolume.BetterVolume`: Developer ID signing does not require a
+  team-prefixed bundle ID, and changing it would reset stored settings.
 - Optionally hide Apple's item: System Settings → Control Center → Sound → *Don't Show in Menu
   Bar*, then ⌘-drag ours into position.
 

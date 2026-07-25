@@ -69,23 +69,25 @@ Re-check with `swift tools/audio-probe.swift`.
 3. **Output devices only.** No inputs.
 4. **Hidden means "not in the menu"** only — still switchable from Settings, still honoured if
    pinned. macOS auto-switching is not fought.
-5. Distribution: **Developer ID + notarisation**. Currently ad-hoc signed.
+5. Distribution: **Developer ID + notarisation**. Signed with Developer ID; not notarised.
 6. No global hotkey.
 
 ## Status
 
-Phases 0–3 complete and verified; Phase 4 ad-hoc signed and installed to
-`/Applications/BetterVolume.app`.
+Phases 0–4 complete. `/Applications/BetterVolume.app` is signed with **Developer ID Application:
+Luciano DiNino (TW9Z5U2FJ9)**, hardened runtime, secure timestamp.
+
+`build_app` auto-detects the Developer ID certificate from the keychain, so plain
+`Scripts/build.sh app` stays correctly signed. Ad-hoc is only the fallback when no cert exists.
 
 Open items:
-- No signing identity is installed (`security find-identity -v -p codesigning` → 0 valid).
-  Create a *Developer ID Application* cert, then
-  `BETTERVOLUME_SIGN_IDENTITY="Developer ID Application: … (TEAMID)" Scripts/build.sh app`.
-  Notarisation commands are in PLAN.md.
-- `BUNDLE_ID` in `Scripts/build.sh` and `AppInfo.bundleIdentifier` are placeholders
-  (`com.bettervolume.BetterVolume`) — change to the real team prefix before signing.
-- Settings live in the `com.bettervolume.BetterVolume` defaults domain; changing the bundle ID
-  resets them.
+- **Not notarised.** Irrelevant for local use (a locally built app is never quarantined, so
+  `spctl` reporting `rejected — Unnotarized Developer ID` does not block launch). Required only
+  before sending the app to anyone else; commands are in PLAN.md.
+- `BUNDLE_ID` in `Scripts/build.sh` and `AppInfo.bundleIdentifier` are still
+  `com.bettervolume.BetterVolume`. Deliberately left alone: Developer ID signing does not
+  require a team-prefixed bundle ID, and changing it resets settings (they live in that defaults
+  domain).
 
 ## Conventions
 

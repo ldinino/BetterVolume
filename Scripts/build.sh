@@ -59,9 +59,16 @@ PLIST
 
     xattr -cr "$app"
 
-    # Ad-hoc signature by default. Set BETTERVOLUME_SIGN_IDENTITY to a "Developer ID
-    # Application: ..." identity to produce a distributable, notarisable build.
-    identity="${BETTERVOLUME_SIGN_IDENTITY:--}"
+    # Prefer an installed "Developer ID Application" certificate so every rebuild carries the
+    # same signature — macOS then keeps granted permissions and the login-item registration
+    # instead of treating each build as a new app (which ad-hoc signing causes). Falls back to
+    # ad-hoc when no such certificate exists; BETTERVOLUME_SIGN_IDENTITY overrides both.
+    identity="${BETTERVOLUME_SIGN_IDENTITY:-}"
+    if [[ -z "$identity" ]]; then
+        identity="$(security find-identity -v -p codesigning |
+            sed -n 's/.*"\(Developer ID Application: .*\)".*/\1/p' | head -1)"
+    fi
+    identity="${identity:--}"
     if [[ "$identity" == "-" ]]; then
         codesign --force --sign - "$app"
     else
