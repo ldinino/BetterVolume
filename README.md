@@ -59,10 +59,6 @@ Bar**. Then ⌘-drag BetterVolume into the spot it left behind.
 | Right click (or ⌃-click) | Device menu, volume slider, settings |
 | Hover | Tooltip showing the current output and where a click will take you |
 
-<p align="center">
-  <img src="Docs/menubar.png" width="460" alt="The BetterVolume icon sitting in the macOS menu bar.">
-</p>
-
 **Left click behaviour** is configurable in Settings:
 
 - **Flip between two devices** — pick a pinned pair; the click always flips between them. If the
