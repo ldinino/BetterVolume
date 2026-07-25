@@ -11,7 +11,7 @@ See [PLAN.md](../PLAN.md) for the full feasibility analysis, evidence and phase 
 Always build through `Scripts/build.sh`:
 
 ```
-Scripts/build.sh test       # 18 unit tests
+Scripts/build.sh test       # 26 unit tests
 Scripts/build.sh run        # run the agent from the terminal
 Scripts/build.sh app        # assemble + sign BetterVolume.app
 Scripts/build.sh install    # app + copy to /Applications
@@ -41,6 +41,9 @@ re-reads the HAL and reconciles, so state is never partially updated.
 Device identity: `DeviceRecord.id` (a `UUID` we mint) is the stable key for pins, recents and
 aliases. Core Audio identity is reconciled separately by `DeviceRegistry` — never key anything
 off a UID or `AudioObjectID`.
+
+Renames and icons are ours: `alias` and `symbolName` on `DeviceRecord`, resolved by
+`displayName` and `DeviceIcons.symbolName(for:)`. Both survive disconnects and UID churn.
 
 ## Verified platform facts (macOS 26.5, Mac Studio)
 
@@ -96,3 +99,8 @@ Open items:
 - Language gotchas already hit: swift-testing's `#expect` rejects `allSatisfy(\.foo)` (rethrows);
   `item.state = cond ? .on : .off` needs an explicit `NSControl.StateValue`; `NSView.fittingSize`
   is zero for manually-framed views.
+- **Never commit a SwiftUI `TextField` on `onSubmit` / `@FocusState` loss inside a macOS `List`** —
+  that focus transition is unreliable and silently drops typed text. Bind straight to the model,
+  and don't trim in the setter: it eats the space the user just typed.
+- Menu bar glyphs go through `DeviceSymbol.statusItemImage`, which centres them on a fixed canvas.
+  SF Symbols differ in width by up to 15pt, and `variableLength` would make the item jump.

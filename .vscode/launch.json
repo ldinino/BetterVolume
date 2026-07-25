@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:BetterVolume}",
+            "name": "Debug BetterVolume",
+            "target": "BetterVolume",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug BetterVolume"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:BetterVolume}",
+            "name": "Release BetterVolume",
+            "target": "BetterVolume",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release BetterVolume"
+        }
+    ]
+}
