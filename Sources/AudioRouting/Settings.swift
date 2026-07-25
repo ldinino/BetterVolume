@@ -9,21 +9,25 @@ public struct DeviceRecord: Codable, Equatable, Sendable, Identifiable {
     public var identity: DeviceIdentity
     public var alias: String?
     public var isHidden: Bool
+    /// An SF Symbol name chosen by the user. `nil` means "work it out from the hardware".
+    public var symbolName: String?
 
     public init(id: UUID = UUID(),
                 identity: DeviceIdentity,
                 alias: String? = nil,
-                isHidden: Bool = false) {
+                isHidden: Bool = false,
+                symbolName: String? = nil) {
         self.id = id
         self.identity = identity
         self.alias = alias
         self.isHidden = isHidden
+        self.symbolName = symbolName
     }
 
     /// What the user sees. An alias always wins over the hardware name.
     public var displayName: String {
-        if let alias, !alias.trimmingCharacters(in: .whitespaces).isEmpty { return alias }
-        return identity.name
+        let trimmed = alias?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return trimmed.isEmpty ? identity.name : trimmed
     }
 }
 

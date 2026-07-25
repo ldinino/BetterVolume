@@ -15,7 +15,7 @@ struct SettingsView: View {
             generalSection
         }
         .padding(16)
-        .frame(width: 480, height: 580)
+        .frame(width: 520, height: 600)
     }
 
     // MARK: - General
@@ -84,7 +84,7 @@ struct SettingsView: View {
     private var devicesSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Devices").font(.headline)
-            Text("Rename anything you like, uncheck to keep it out of the menu, drag to reorder.")
+            Text("Rename anything you like, pick an icon, uncheck to keep it out of the menu, drag to reorder.")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
@@ -125,9 +125,6 @@ private struct DeviceRow: View {
     let model: AppModel
     let device: ResolvedDevice
 
-    @State private var alias: String = ""
-    @FocusState private var isEditing: Bool
-
     var body: some View {
         HStack(spacing: 8) {
             Toggle("", isOn: visibleBinding)
@@ -135,17 +132,10 @@ private struct DeviceRow: View {
                 .labelsHidden()
                 .help(device.record.isHidden ? "Hidden from the menu" : "Shown in the menu")
 
-            Image(systemName: DeviceSymbol.name(for: device))
-                .frame(width: 18)
-                .foregroundStyle(device.isOnline ? .primary : .tertiary)
+            iconMenu
 
-            TextField(device.record.identity.name, text: $alias)
+            TextField(device.record.identity.name, text: aliasBinding)
                 .textFieldStyle(.roundedBorder)
-                .focused($isEditing)
-                .onSubmit { commit() }
-                .onChange(of: isEditing) { _, editing in
-                    if !editing { commit() }
-                }
 
             Text(device.isCurrent ? "in use" : (device.isOnline ? "" : "offline"))
                 .font(.caption)
@@ -153,7 +143,29 @@ private struct DeviceRow: View {
                 .frame(width: 46, alignment: .trailing)
         }
         .padding(.vertical, 2)
-        .task(id: device.record.alias) { alias = device.record.alias ?? "" }
+    }
+
+    private var iconMenu: some View {
+        Menu {
+            Picker("Icon", selection: symbolBinding) {
+                Label("Automatic", systemImage: DeviceIcons.automaticSymbolName(for: device))
+                    .tag(String?.none)
+                Divider()
+                ForEach(DeviceIcons.catalog) { icon in
+                    Label(icon.label, systemImage: icon.symbolName)
+                        .tag(String?.some(icon.symbolName))
+                }
+            }
+            .pickerStyle(.inline)
+            .labelsHidden()
+        } label: {
+            Image(systemName: DeviceIcons.symbolName(for: device))
+                .foregroundStyle(device.isOnline ? .primary : .tertiary)
+        }
+        .menuStyle(.borderlessButton)
+        .menuIndicator(.hidden)
+        .frame(width: 26)
+        .help("Choose an icon")
     }
 
     private var visibleBinding: Binding<Bool> {
@@ -161,8 +173,13 @@ private struct DeviceRow: View {
                 set: { model.setHidden(!$0, for: device.id) })
     }
 
-    private func commit() {
-        guard alias != (device.record.alias ?? "") else { return }
-        model.setAlias(alias, for: device.id)
+    private var aliasBinding: Binding<String> {
+        Binding(get: { device.record.alias ?? "" },
+                set: { model.setAlias($0, for: device.id) })
+    }
+
+    private var symbolBinding: Binding<String?> {
+        Binding(get: { device.record.symbolName },
+                set: { model.setSymbolName($0, for: device.id) })
     }
 }

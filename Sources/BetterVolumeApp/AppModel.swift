@@ -87,21 +87,18 @@ final class AppModel {
 
     // MARK: - Settings mutations
 
+    /// Stored verbatim so nothing is eaten mid-typing — `displayName` does the trimming.
     func setAlias(_ alias: String, for id: UUID) {
-        guard let index = settings.devices.firstIndex(where: { $0.id == id }) else { return }
-        let trimmed = alias.trimmingCharacters(in: .whitespacesAndNewlines)
-        var copy = settings
-        copy.devices[index].alias = trimmed.isEmpty ? nil : trimmed
-        persist(copy)
-        refresh()
+        updateRecord(id: id) { $0.alias = alias.isEmpty ? nil : alias }
+    }
+
+    /// `nil` restores the automatic icon.
+    func setSymbolName(_ symbolName: String?, for id: UUID) {
+        updateRecord(id: id) { $0.symbolName = symbolName }
     }
 
     func setHidden(_ isHidden: Bool, for id: UUID) {
-        guard let index = settings.devices.firstIndex(where: { $0.id == id }) else { return }
-        var copy = settings
-        copy.devices[index].isHidden = isHidden
-        persist(copy)
-        refresh()
+        updateRecord(id: id) { $0.isHidden = isHidden }
     }
 
     func moveDevices(fromOffsets source: IndexSet, toOffset destination: Int) {
@@ -127,6 +124,20 @@ final class AppModel {
     }
 
     // MARK: - Internals
+
+    /// Edits one record in place. Deliberately avoids `refresh()`: re-reading the HAL on every
+    /// keystroke replaces `devices` wholesale and makes the rename field fight the user.
+    private func updateRecord(id: UUID, _ mutate: (inout DeviceRecord) -> Void) {
+        guard let index = settings.devices.firstIndex(where: { $0.id == id }) else { return }
+        var copy = settings
+        mutate(&copy.devices[index])
+        guard copy != settings else { return }
+        persist(copy)
+        if let resolved = devices.firstIndex(where: { $0.id == id }) {
+            devices[resolved].record = copy.devices[index]
+        }
+        onChange?()
+    }
 
     private func persist(_ newSettings: Settings) {
         guard newSettings != settings else { return }
