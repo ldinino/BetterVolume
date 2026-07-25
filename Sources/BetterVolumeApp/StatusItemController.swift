@@ -124,12 +124,13 @@ final class StatusItemController: NSObject {
     private func updateButton() {
         guard let button = statusItem.button else { return }
         guard let current = model.currentDevice else {
-            button.image = DeviceSymbol.image(named: "speaker.slash", description: "No output device")
+            button.image = DeviceSymbol.statusItemImage(named: "speaker.slash",
+                                                        description: "No output device")
             button.toolTip = "\(AppInfo.name) — no audio output"
             return
         }
-        button.image = DeviceSymbol.image(named: DeviceSymbol.name(for: current),
-                                          description: current.displayName)
+        button.image = DeviceSymbol.statusItemImage(named: DeviceSymbol.name(for: current),
+                                                    description: current.displayName)
         button.toolTip = model.toggleTarget.map {
             "Output: \(current.displayName)\nClick to switch to \($0.displayName)"
         } ?? "Output: \(current.displayName)"
