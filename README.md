@@ -18,6 +18,10 @@ between the two outputs you actually use should be a single click.**
 
 No third-party dependencies. Swift 6, SwiftPM, under 1,500 lines of Swift.
 
+<p align="center">
+  <img src="Docs/menu.png" width="286" alt="The BetterVolume menu: a volume slider above the list of output devices, each with its own icon, and a checkmark on the one in use.">
+</p>
+
 ## Why
 
 macOS makes you option-click the Sound icon and pick from a list every single time. If you go
@@ -55,6 +59,10 @@ Bar**. Then ⌘-drag BetterVolume into the spot it left behind.
 | Right click (or ⌃-click) | Device menu, volume slider, settings |
 | Hover | Tooltip showing the current output and where a click will take you |
 
+<p align="center">
+  <img src="Docs/menubar.png" width="460" alt="The BetterVolume icon sitting in the macOS menu bar.">
+</p>
+
 **Left click behaviour** is configurable in Settings:
 
 - **Flip between two devices** — pick a pinned pair; the click always flips between them. If the
@@ -66,6 +74,10 @@ A half-configured pair falls back to most-recently-used rather than doing nothin
 ## Settings
 
 Right click → Settings…
+
+<p align="center">
+  <img src="Docs/settings.png" width="520" alt="BetterVolume settings: left click behaviour at the top, then the device list with a checkbox, icon picker and editable name for each device.">
+</p>
 
 - **Rename** — type in any row. Names are display-only aliases; Core Audio doesn't let apps
   rename devices.
