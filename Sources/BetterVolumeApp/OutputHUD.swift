@@ -9,7 +9,7 @@ import AudioRouting
 @MainActor
 final class OutputHUD {
     private let visibleDuration: TimeInterval = 1.1
-    private let fadeIn: TimeInterval = 0.12
+    private let fadeIn: TimeInterval = 0.18
     private let fadeOut: TimeInterval = 0.35
 
     private lazy var panel = makePanel()
@@ -31,9 +31,16 @@ final class OutputHUD {
         panel.setFrame(frame(), display: false)
 
         panel.orderFrontRegardless()
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = fadeIn
-            panel.animator().alphaValue = 1
+        panel.displayIfNeeded()
+        // One run-loop pass before animating: a window that has not yet drawn skips its first
+        // alpha animation and snaps straight to the end value.
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.generation == shown else { return }
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = self.fadeIn
+                context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+                self.panel.animator().alphaValue = 1
+            }
         }
 
         hideTask = Task { [weak self] in
