@@ -60,6 +60,10 @@ Bar**. Then ⌘-drag BetterVolume into the spot it left behind.
 | Keyboard shortcut | Same as a left click, from any app (optional) |
 | Hover | Tooltip showing the current output and where a click will take you |
 
+Every switch shows a brief panel in the lower third of the screen — the device's icon and its
+name, fading in and out like the system volume HUD. It sits above full-screen apps, so a
+shortcut press inside a game still tells you where the sound went.
+
 **Left click behaviour** is configurable in Settings:
 
 - **Flip between two devices** — pick a pinned pair; the click always flips between them. If the

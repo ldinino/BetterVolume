@@ -15,6 +15,8 @@ final class AppModel {
     @ObservationIgnored var onChange: (@MainActor () -> Void)?
     /// Called when the global shortcut is pressed. Wired to the same path as a left click.
     @ObservationIgnored var onHotKey: (@MainActor () -> Void)?
+    /// Called after we switch the output ourselves, so the change can be shown on screen.
+    @ObservationIgnored var onOutputChanged: (@MainActor (ResolvedDevice) -> Void)?
 
     @ObservationIgnored private let audio = HALAudioSystem()
     @ObservationIgnored private let hotKeys = GlobalHotKeyMonitor()
@@ -71,6 +73,9 @@ final class AppModel {
             try audio.setDefaultOutput(device)
             persist(settings.recordingUse(of: target.id))
             refresh()
+            // Report the reconciled record, not the one we were handed, so the name and icon
+            // are whatever the menu would show now.
+            onOutputChanged?(devices.first { $0.id == target.id } ?? target)
             return true
         } catch {
             return false

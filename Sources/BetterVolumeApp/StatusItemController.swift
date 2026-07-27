@@ -6,6 +6,7 @@ import AudioRouting
 final class StatusItemController: NSObject {
     private let statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
     private let model: AppModel
+    private let hud = OutputHUD()
     private lazy var preferences = PreferencesWindowController(model: model)
 
     init(model: AppModel) {
@@ -14,6 +15,10 @@ final class StatusItemController: NSObject {
         configureButton()
         model.onChange = { [weak self] in self?.updateButton() }
         model.onHotKey = { [weak self] in self?.toggleOutput() }
+        model.onOutputChanged = { [weak self] device in
+            self?.hud.show(symbolName: DeviceSymbol.name(for: device),
+                           title: device.displayName)
+        }
         updateButton()
     }
 
