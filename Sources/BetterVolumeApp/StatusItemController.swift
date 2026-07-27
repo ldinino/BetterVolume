@@ -13,6 +13,7 @@ final class StatusItemController: NSObject {
         super.init()
         configureButton()
         model.onChange = { [weak self] in self?.updateButton() }
+        model.onHotKey = { [weak self] in self?.toggleOutput() }
         updateButton()
     }
 

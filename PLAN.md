@@ -322,4 +322,6 @@ verify it as a stopgap while the native app gets written.
    and are still honoured if pinned; macOS auto-switching is not fought.
 5. **Distribution:** shareable — Developer ID + notarisation. Currently ad-hoc signed because no
    signing identity is installed yet (see Phase 4).
-6. **No global hotkey.** The menu-bar click is enough.
+6. **Global hotkey.** Optional, off by default; registered with Carbon's `RegisterEventHotKey`
+   so it needs no Accessibility permission. A function key (F1–F20) is accepted on its own —
+   the point is a spare key on a programmable keyboard — anything else needs a modifier.

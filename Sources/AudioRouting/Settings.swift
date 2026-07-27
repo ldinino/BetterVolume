@@ -48,6 +48,8 @@ public struct Settings: Codable, Equatable, Sendable {
     public var pinnedSecond: UUID?
     /// Most recently used first, capped at `recentsLimit`.
     public var recents: [UUID]
+    /// A system-wide key that does the same as a left click. `nil` means no shortcut.
+    public var hotKey: HotKey?
 
     public static let recentsLimit = 10
 
@@ -55,12 +57,14 @@ public struct Settings: Codable, Equatable, Sendable {
                 toggleMode: ToggleMode = .pinnedPair,
                 pinnedFirst: UUID? = nil,
                 pinnedSecond: UUID? = nil,
-                recents: [UUID] = []) {
+                recents: [UUID] = [],
+                hotKey: HotKey? = nil) {
         self.devices = devices
         self.toggleMode = toggleMode
         self.pinnedFirst = pinnedFirst
         self.pinnedSecond = pinnedSecond
         self.recents = recents
+        self.hotKey = hotKey
     }
 
     /// The pair, but only when it is complete and refers to two different devices.

@@ -10,12 +10,35 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 14) {
             clickBehaviourSection
             Divider()
+            shortcutSection
+            Divider()
             devicesSection
             Divider()
             generalSection
         }
         .padding(16)
-        .frame(width: 520, height: 600)
+        .frame(width: 520, height: 640)
+    }
+
+    // MARK: - Keyboard shortcut
+
+    private var shortcutSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Keyboard shortcut").font(.headline)
+            Text("Does the same as a left click, from any app. A function key works on its own — handy for a programmable key.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            HotKeyRecorder(hotKey: model.settings.hotKey,
+                           onRecord: { model.setHotKey($0) },
+                           onArmedChange: { $0 ? model.suspendHotKey() : model.resumeHotKey() })
+
+            if model.isHotKeyRejected {
+                Text("macOS refused that shortcut — another app is probably using it.")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+        }
     }
 
     // MARK: - General

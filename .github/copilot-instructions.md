@@ -73,7 +73,8 @@ Re-check with `swift tools/audio-probe.swift`.
 4. **Hidden means "not in the menu"** only — still switchable from Settings, still honoured if
    pinned. macOS auto-switching is not fought.
 5. Distribution: **Developer ID + notarisation**. Signed with Developer ID; not notarised.
-6. No global hotkey.
+6. Optional **global hotkey**, registered via Carbon `RegisterEventHotKey` (no Accessibility
+   permission). Bare function keys allowed; everything else needs a modifier.
 
 ## Status
 

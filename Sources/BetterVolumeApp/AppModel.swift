@@ -8,11 +8,16 @@ import Observation
 final class AppModel {
     private(set) var settings: Settings
     private(set) var devices: [ResolvedDevice] = []
+    /// True when the system refused the saved shortcut, i.e. another app already owns it.
+    private(set) var isHotKeyRejected = false
 
     /// Called after any change so the AppKit status item can redraw.
     @ObservationIgnored var onChange: (@MainActor () -> Void)?
+    /// Called when the global shortcut is pressed. Wired to the same path as a left click.
+    @ObservationIgnored var onHotKey: (@MainActor () -> Void)?
 
     @ObservationIgnored private let audio = HALAudioSystem()
+    @ObservationIgnored private let hotKeys = GlobalHotKeyMonitor()
     @ObservationIgnored private let store: SettingsStore
 
     init(store: SettingsStore = SettingsStore()) {
@@ -20,6 +25,8 @@ final class AppModel {
         self.settings = store.load()
         audio.onChange = { [weak self] in self?.handleSystemChange() }
         audio.startObserving()
+        hotKeys.action = { [weak self] in self?.onHotKey?() }
+        syncHotKey()
         refresh()
         rememberCurrentDevice()
     }
@@ -123,6 +130,25 @@ final class AppModel {
         refresh()
     }
 
+    /// `nil` removes the shortcut.
+    func setHotKey(_ hotKey: HotKey?) {
+        var copy = settings
+        copy.hotKey = hotKey
+        persist(copy)
+        syncHotKey()
+        onChange?()
+    }
+
+    /// A registered hot key is swallowed by Carbon before any in-app event monitor sees it, so
+    /// recording a replacement has to stand it down first.
+    func suspendHotKey() {
+        hotKeys.update(to: nil)
+    }
+
+    func resumeHotKey() {
+        syncHotKey()
+    }
+
     // MARK: - Internals
 
     /// Edits one record in place. Deliberately avoids `refresh()`: re-reading the HAL on every
@@ -143,6 +169,10 @@ final class AppModel {
         guard newSettings != settings else { return }
         settings = newSettings
         store.save(newSettings)
+    }
+
+    private func syncHotKey() {
+        isHotKeyRejected = !hotKeys.update(to: settings.hotKey)
     }
 
     /// Any change counts as a use, including ones macOS makes for us (a headset connecting,

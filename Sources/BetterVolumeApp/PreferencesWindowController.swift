@@ -19,7 +19,7 @@ final class PreferencesWindowController {
 
     private func makeWindow() -> NSWindow {
         // Matches the fixed frame in `SettingsView` — a mismatch just clips the content.
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 520, height: 600),
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 520, height: 640),
                               styleMask: [.titled, .closable, .miniaturizable],
                               backing: .buffered,
                               defer: false)

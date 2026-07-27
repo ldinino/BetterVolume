@@ -57,6 +57,7 @@ Bar**. Then ⌘-drag BetterVolume into the spot it left behind.
 |---|---|
 | Left click | Switch to the other output |
 | Right click (or ⌃-click) | Device menu, volume slider, settings |
+| Keyboard shortcut | Same as a left click, from any app (optional) |
 | Hover | Tooltip showing the current output and where a click will take you |
 
 **Left click behaviour** is configurable in Settings:
@@ -82,6 +83,10 @@ Right click → Settings…
 - **Hide** — uncheck a device to keep it out of the menu. It stays switchable from Settings and
   is still honoured if it's pinned.
 - **Reorder** — drag rows to set the menu order.
+- **Keyboard shortcut** — click *Record shortcut* and press a key to switch outputs from
+  anywhere. A function key (F1–F20) is accepted on its own, so a spare key on a programmable
+  keyboard works; every other key needs ⌘, ⌥, ⌃ or ⇧. Registered through Carbon, so macOS
+  asks for no Accessibility permission.
 - **Start at login** — available once you're running from the app bundle.
 
 Disconnected devices stay in the list so their names, icons and pins survive unplugging. Device
@@ -100,7 +105,6 @@ assumed:
   `output volume: missing value`). The slider shows maxed and disabled to match, rather than
   faking it.
 - **Output devices only.** No microphone or input switching.
-- **No global hotkey.**
 - **Renames are ours, not the system's.** `kAudioObjectPropertyName` isn't settable, so other
   apps still see the hardware name.
 
