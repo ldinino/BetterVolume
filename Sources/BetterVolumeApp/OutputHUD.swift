@@ -51,8 +51,12 @@ final class OutputHUD {
             context.duration = fadeOut
             panel.animator().alphaValue = 0
         } completionHandler: { [weak self] in
-            guard let self, generation == shown else { return }
-            panel.orderOut(nil)
+            // The completion handler is not isolated, but AppKit only ever runs it on the main
+            // thread, so hopping would just add a frame of delay before the panel goes away.
+            MainActor.assumeIsolated {
+                guard let self, self.generation == shown else { return }
+                self.panel.orderOut(nil)
+            }
         }
     }
 
@@ -68,27 +72,47 @@ final class OutputHUD {
         let content = contentView.fittingSize
         let size = NSSize(width: min(max(content.width, 180), screen.frame.width - 40),
                           height: content.height)
-        return HUDPlacement.frame(size: size, in: screen.frame)    }
+        return HUDPlacement.frame(size: size, in: screen.frame)
+    }
 
     private lazy var contentView: NSView = {
-        iconView.imageScaling = .scaleProportionallyUpOrDown
-        iconView.setContentCompressionResistancePriority(.required, for: .vertical)
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        iconView.imageScaling = .scaleProportionallyDown
+        iconView.setContentCompressionResistancePriority(.required, for: .horizontal)
 
+        label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 13, weight: .medium)
         label.alignment = .center
         label.lineBreakMode = .byTruncatingTail
         label.maximumNumberOfLines = 1
-        // Without a ceiling a long alias stretches the panel across the screen; with one the
-        // name truncates instead.
-        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        label.widthAnchor.constraint(lessThanOrEqualToConstant: 300).isActive = true
+        // High rather than required: the panel grows to fit the name, but a long alias yields to
+        // the 300pt cap below and truncates instead of stretching across the screen.
+        label.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
 
-        let stack = NSStackView(views: [iconView, label])
-        stack.orientation = .vertical
-        stack.alignment = .centerX
-        stack.spacing = 10
-        stack.edgeInsets = NSEdgeInsets(top: 22, left: 24, bottom: 20, right: 24)
-        return stack
+        // Explicit constraints rather than an NSStackView, and a fixed icon box rather than the
+        // image's own size. `fittingSize` compresses whatever it is allowed to, and an
+        // NSImageView resists only weakly, so the panel came out 25pt shorter than its contents
+        // and the icon overlapped the name. The fixed box also keeps the panel one size for
+        // every device: SF Symbols vary from 40 to 53pt tall at the same point size.
+        let container = NSView()
+        container.translatesAutoresizingMaskIntoConstraints = false
+        container.addSubview(iconView)
+        container.addSubview(label)
+        NSLayoutConstraint.activate([
+            iconView.heightAnchor.constraint(equalToConstant: 46),
+            iconView.topAnchor.constraint(equalTo: container.topAnchor, constant: 20),
+            iconView.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            iconView.leadingAnchor.constraint(greaterThanOrEqualTo: container.leadingAnchor,
+                                              constant: 24),
+
+            label.topAnchor.constraint(equalTo: iconView.bottomAnchor, constant: 8),
+            label.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -20),
+            label.centerXAnchor.constraint(equalTo: container.centerXAnchor),
+            label.leadingAnchor.constraint(greaterThanOrEqualTo: container.leadingAnchor,
+                                           constant: 24),
+            label.widthAnchor.constraint(lessThanOrEqualToConstant: 300),
+        ])
+        return container
     }()
 
     private func makePanel() -> NSPanel {
@@ -111,10 +135,11 @@ final class OutputHUD {
         blur.material = .hudWindow
         blur.blendingMode = .behindWindow
         blur.state = .active
-        blur.wantsLayer = true
-        blur.layer?.cornerRadius = 18
-        blur.layer?.cornerCurve = .continuous
-        blur.layer?.masksToBounds = true
+        // A layer corner radius does not round the *backdrop*: the window server still blurs
+        // and composites the full rectangle, which shows up as square patches at the corners
+        // over a light background. `maskImage` is the shape the effect view actually honours,
+        // and the window shadow follows it too.
+        blur.maskImage = Self.roundedMask(radius: 18)
 
         let content = contentView
         content.translatesAutoresizingMaskIntoConstraints = false
@@ -126,5 +151,18 @@ final class OutputHUD {
 
         panel.contentView = blur
         return panel
+    }
+
+    /// A stretchable rounded rectangle: only the corners are drawn, the middle is tiled.
+    private static func roundedMask(radius: CGFloat) -> NSImage {
+        let edge = radius * 2 + 1
+        let image = NSImage(size: NSSize(width: edge, height: edge), flipped: false) { rect in
+            NSColor.black.setFill()
+            NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius).fill()
+            return true
+        }
+        image.capInsets = NSEdgeInsets(top: radius, left: radius, bottom: radius, right: radius)
+        image.resizingMode = .stretch
+        return image
     }
 }
