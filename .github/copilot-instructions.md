@@ -33,6 +33,7 @@ thing that will build.
 | `Sources/AudioRouting` | **Pure logic.** No AppKit, no CoreAudio. All unit tests point here. |
 | `Sources/AudioHAL` | The **only** code that touches Core Audio (`HALAudioSystem`). |
 | `Sources/BetterVolumeApp` | AppKit status item + SwiftUI settings window. |
+| `Resources/AppIcon.icns` | App icon. **Third-party, LGPL v3** — see below. |
 
 `AppModel` is the single `@Observable` source of truth. SwiftUI observes it directly; the AppKit
 status item redraws via the `onChange` callback. All settings mutations call `refresh()`, which
@@ -105,3 +106,16 @@ Open items:
   and don't trim in the setter: it eats the space the user just typed.
 - Menu bar glyphs go through `DeviceSymbol.statusItemImage`, which centres them on a fixed canvas.
   SF Symbols differ in width by up to 15pt, and `variableLength` would make the item jump.
+
+## The app icon is not ours
+
+`Resources/AppIcon.icns` is *multimedia-volume-control* from KDE's Oxygen icon theme, **LGPL v3**.
+The MIT license covers our code only. Three attribution surfaces must stay in sync — repo
+([THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md) + `Docs/licenses/`), bundle
+(`NSHumanReadableCopyright` in `build_app`, plus the notices and LICENSE copied into
+`Contents/Resources`) and app (`AppInfo.credits` → the About panel). If the icon is ever
+replaced, update all three.
+
+The icns tops out at 256px because that is the largest Oxygen raster; it carries 16, 16@2x, 32,
+32@2x, 128, 128@2x and 256 slots. `build.sh install` `touch`es the installed bundle so Finder
+drops its cached icon.

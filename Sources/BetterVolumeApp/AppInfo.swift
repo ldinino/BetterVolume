@@ -5,6 +5,28 @@ enum AppInfo {
     static let name = "BetterVolume"
     /// Also used as the app bundle identifier — change the prefix to your team's before signing.
     static let bundleIdentifier = "com.bettervolume.BetterVolume"
+
+    /// Credits for the standard About panel. The app icon is LGPL, so its attribution has to
+    /// travel with the binary and not just live in the repo's THIRD-PARTY-NOTICES.md.
+    static var credits: NSAttributedString {
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .center
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize),
+            .foregroundColor: NSColor.secondaryLabelColor,
+            .paragraphStyle: paragraph,
+        ]
+        var linked = attributes
+        if let url = URL(string: "https://invent.kde.org/frameworks/oxygen-icons") {
+            linked[.link] = url
+        }
+
+        let credits = NSMutableAttributedString(string: "App icon from the ", attributes: attributes)
+        credits.append(NSAttributedString(string: "Oxygen icon theme", attributes: linked))
+        credits.append(NSAttributedString(string: " by the Oxygen Team, used under the LGPL v3.",
+                                          attributes: attributes))
+        return credits
+    }
 }
 
 enum DeviceSymbol {

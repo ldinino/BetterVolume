@@ -154,3 +154,9 @@ notarisation is required before sending the app to anyone else. The commands are
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+The app icon is not mine: it's *multimedia-volume-control* from KDE's
+[Oxygen icon theme](https://invent.kde.org/frameworks/oxygen-icons), by the Oxygen Team, used
+under the LGPL v3. Open source all the way down. Full attribution, the licence texts and
+instructions for swapping the icon out are in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md);
+the same credit is in the app's own About panel.

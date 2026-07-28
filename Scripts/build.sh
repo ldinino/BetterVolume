@@ -19,6 +19,8 @@ SCRATCH="${BETTERVOLUME_SCRATCH:-$HOME/Library/Caches/BetterVolume-build}"
 SWIFT_FLAGS=(--package-path "$REPO_ROOT" --scratch-path "$SCRATCH" --disable-index-store)
 APP_NAME="BetterVolume"
 BUNDLE_ID="com.bettervolume.BetterVolume"
+ICON_NAME="AppIcon"
+COPYRIGHT="Copyright © 2026 Luciano DiNino. MIT licensed. App icon from the Oxygen icon theme by the Oxygen Team, LGPL v3 — see THIRD-PARTY-NOTICES.md."
 # Also on local disk: an SMB share attaches Finder metadata that codesign rejects.
 DIST_DIR="${BETTERVOLUME_DIST:-$SCRATCH/dist}"
 
@@ -38,6 +40,10 @@ build_app() {
     rm -rf "$app"
     mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
     cp "$bin" "$app/Contents/MacOS/$APP_NAME"
+    cp "$REPO_ROOT/Resources/$ICON_NAME.icns" "$app/Contents/Resources/$ICON_NAME.icns"
+    # LGPL: ship the icon's attribution and licence notice alongside the binary.
+    cp "$REPO_ROOT/THIRD-PARTY-NOTICES.md" "$app/Contents/Resources/THIRD-PARTY-NOTICES.md"
+    cp "$REPO_ROOT/LICENSE" "$app/Contents/Resources/LICENSE"
 
     cat >"$app/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
@@ -48,9 +54,11 @@ build_app() {
     <key>CFBundleDisplayName</key><string>$APP_NAME</string>
     <key>CFBundleIdentifier</key><string>$BUNDLE_ID</string>
     <key>CFBundleExecutable</key><string>$APP_NAME</string>
+    <key>CFBundleIconFile</key><string>$ICON_NAME</string>
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleShortVersionString</key><string>0.1.0</string>
     <key>CFBundleVersion</key><string>1</string>
+    <key>NSHumanReadableCopyright</key><string>$COPYRIGHT</string>
     <key>LSMinimumSystemVersion</key><string>14.0</string>
     <key>LSUIElement</key><true/>
 </dict>
@@ -102,6 +110,8 @@ install)
     pkill -x "$APP_NAME" 2>/dev/null || true
     rm -rf "$target"
     ditto "$DIST_DIR/$APP_NAME.app" "$target"
+    # Nudge Finder/Dock to re-read the icon rather than serve a stale cached one.
+    touch "$target"
     echo "Installed $target"
     ;;
 

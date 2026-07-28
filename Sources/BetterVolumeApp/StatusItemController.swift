@@ -64,6 +64,11 @@ final class StatusItemController: NSObject {
         preferences.show()
     }
 
+    @objc private func showAbout() {
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.orderFrontStandardAboutPanel(options: [.credits: AppInfo.credits])
+    }
+
     @objc private func quit() {
         NSApp.terminate(nil)
     }
@@ -109,6 +114,10 @@ final class StatusItemController: NSObject {
         let settingsItem = NSMenuItem(title: "Settings…", action: #selector(showSettings), keyEquivalent: ",")
         settingsItem.target = self
         menu.addItem(settingsItem)
+
+        let aboutItem = NSMenuItem(title: "About \(AppInfo.name)", action: #selector(showAbout), keyEquivalent: "")
+        aboutItem.target = self
+        menu.addItem(aboutItem)
 
         let quitItem = NSMenuItem(title: "Quit \(AppInfo.name)", action: #selector(quit), keyEquivalent: "q")
         quitItem.target = self
