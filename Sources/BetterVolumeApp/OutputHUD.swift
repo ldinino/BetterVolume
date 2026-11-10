@@ -135,8 +135,8 @@ final class OutputHUD {
         panel.isReleasedWhenClosed = false
         panel.hidesOnDeactivate = false
         panel.alphaValue = 0
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary,
-                                    .ignoresCycle]
+        panel.collectionBehavior = [.canJoinAllSpaces, .canJoinAllApplications,
+                        .fullScreenAuxiliary, .stationary, .ignoresCycle]
 
         let blur = NSVisualEffectView()
         blur.material = .hudWindow
